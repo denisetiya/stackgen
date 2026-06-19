@@ -35,21 +35,27 @@ const isActive = (p: string) =>
         </a>
         <nav class="flex items-center gap-1 text-sm">
           {[
-            { href: '/docker', label: 'Docker' },
-            { href: '/gateway', label: 'Gateway' },
-            { href: '/cicd', label: 'CI/CD' },
+            { href: '/', label: 'Generator' },
+            { href: 'https://github.com/denisetiya/stackgen', label: 'GitHub', external: true },
           ].map((l) => (
             <a
               href={l.href}
+              target={l.external ? '_blank' : undefined}
+              rel={l.external ? 'noopener noreferrer' : undefined}
               class:list={[
                 'relative rounded-md px-3 py-1.5 font-medium transition',
-                isActive(l.href)
+                l.href !== 'https://github.com/denisetiya/stackgen' && isActive(l.href)
                   ? 'text-violet-200 glow-violet'
-                  : 'text-ink-400 hover:text-ink-100 hover:bg-ink-900/60',
+                  : l.href === 'https://github.com/denisetiya/stackgen'
+                    ? 'text-ink-400 hover:text-ink-100 hover:bg-ink-900/60 inline-flex items-center gap-1'
+                    : 'text-ink-400 hover:text-ink-100 hover:bg-ink-900/60',
               ]}
             >
               {l.label}
-              {isActive(l.href) && (
+              {l.external && (
+                <svg viewBox="0 0 16 16" class="h-3 w-3 text-ink-600" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3h8v8M5 11l8-8" stroke-linecap="round"/></svg>
+              )}
+              {l.href !== 'https://github.com/denisetiya/stackgen' && isActive(l.href) && (
                 <span class="absolute -bottom-[13px] left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.9)]"></span>
               )}
             </a>

@@ -8,22 +8,22 @@ const databases = JSON.stringify(DATABASES);
 <Layout title="Docker Generator — Stackgen">
   <div x-data="dockerWizard" x-cloak>
     <!-- Header + progress -->
-    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-6 flex flex-col gap-4 sm:mb-8 md:flex-row md:items-center md:justify-between">
       <div>
         <a href="/" class="inline-flex items-center gap-1.5 text-xs text-ink-400 hover:text-ink-200 transition">
           <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
           Back
         </a>
-        <h1 class="mt-2 text-2xl font-semibold tracking-tight">Docker Generator</h1>
+        <h1 class="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">Docker Generator</h1>
       </div>
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1.5">
           <template x-for="(s, i) in steps" :key="i">
             <div :class="{
               'bg-violet-500 shadow-[0_0_16px_rgba(167,139,250,0.7)]': step > i,
-              'bg-violet-400 w-14 shadow-[0_0_20px_rgba(167,139,250,0.9)]': step === i,
+              'bg-violet-400 w-12 sm:w-14 shadow-[0_0_20px_rgba(167,139,250,0.9)]': step === i,
               'bg-ink-800': step < i
-            }" class="h-1.5 w-10 rounded-full transition-all duration-300"></div>
+            }" class="h-1.5 w-8 rounded-full transition-all duration-300 sm:w-10"></div>
           </template>
         </div>
         <div class="font-mono text-xs text-ink-500 tabular-nums">
@@ -35,23 +35,23 @@ const databases = JSON.stringify(DATABASES);
     </div>
 
     <!-- STEP 0: Mode + Framework -->
-    <div x-show="step === 0" class="card-ambient" x-transition.opacity>
-      <div class="mb-6 flex items-baseline justify-between">
-        <div>
-          <h2 class="text-xl font-semibold tracking-tight">Choose stack mode & framework</h2>
-          <p class="mt-1 text-sm text-ink-400">Single service or microservice stack</p>
+    <div x-show="step === 0" class="card-ambient p-4 sm:p-6" x-transition.opacity>
+      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
+        <div class="min-w-0">
+          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Choose stack mode &amp; framework</h2>
+          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Single service or microservice stack</p>
         </div>
-        <span class="font-mono text-xs text-ink-600">01</span>
+        <span class="shrink-0 font-mono text-xs text-ink-600">01</span>
       </div>
 
-      <div class="mb-7">
+      <div class="mb-6 sm:mb-7">
         <label class="label">Mode</label>
-        <div class="grid grid-cols-2 gap-3">
-          <button @click="config.mode = 'single'; removeService(0)" :class="config.mode === 'single' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-4 text-left transition">
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+          <button @click="config.mode = 'single'; removeService(0)" :class="config.mode === 'single' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-3 text-left transition sm:p-4">
             <div class="text-sm font-semibold">Single service</div>
             <div class="mt-1 text-xs text-ink-400">One app, one Dockerfile</div>
           </button>
-          <button @click="config.mode = 'microservice'; if(config.services.length < 2) { removeService(0); addService(); addService(); }" :class="config.mode === 'microservice' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-4 text-left transition">
+          <button @click="config.mode = 'microservice'; if(config.services.length < 2) { removeService(0); addService(); addService(); }" :class="config.mode === 'microservice' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-3 text-left transition sm:p-4">
             <div class="text-sm font-semibold">Microservice stack</div>
             <div class="mt-1 text-xs text-ink-400">Multi-service with shared network</div>
           </button>
@@ -59,9 +59,9 @@ const databases = JSON.stringify(DATABASES);
       </div>
 
       <template x-for="(svc, i) in config.services" :key="i">
-        <div class="mb-6 border-t border-ink-800/60 pt-6 first:border-t-0 first:pt-0">
-          <div class="mb-4 flex items-center justify-between">
-            <h3 class="text-sm font-semibold tracking-wide uppercase text-ink-300">
+        <div class="mb-5 border-t border-ink-800/60 pt-5 first:border-t-0 first:pt-0 sm:mb-6 sm:pt-6">
+          <div class="mb-3 flex items-center justify-between sm:mb-4">
+            <h3 class="text-xs font-semibold tracking-wide uppercase text-ink-300 sm:text-sm">
               Service <span x-text="i + 1"></span>
             </h3>
             <button x-show="config.services.length > 1" @click="removeService(i)" class="text-xs text-ink-500 hover:text-red-400 transition">
@@ -69,19 +69,19 @@ const databases = JSON.stringify(DATABASES);
             </button>
           </div>
 
-          <div class="mb-5">
+          <div class="mb-4 sm:mb-5">
             <label class="label">Framework</label>
-            <div class="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               <template x-for="fw in frameworks" :key="fw.id">
-                <button @click="svc.framework = fw.id; svc.port = fw.defaultPort" :class="svc.framework === fw.id ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-3 text-left transition">
-                  <div class="text-sm font-medium" x-text="fw.name"></div>
-                  <div class="mt-0.5 text-[11px] text-ink-500" x-text="fw.lang + ' · :' + fw.defaultPort"></div>
+                <button @click="svc.framework = fw.id; svc.port = fw.defaultPort" :class="svc.framework === fw.id ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="min-h-[3.5rem] rounded-lg border bg-ink-900/40 p-2.5 text-left transition sm:p-3">
+                  <div class="truncate text-xs font-medium sm:text-sm" x-text="fw.name"></div>
+                  <div class="mt-0.5 truncate text-[10px] text-ink-500 sm:text-[11px]" x-text="fw.lang + ' · :' + fw.defaultPort"></div>
                 </button>
               </template>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label class="label">Service name</label>
               <input type="text" class="input" x-model="svc.name" placeholder="api" />
@@ -118,30 +118,34 @@ const databases = JSON.stringify(DATABASES);
     </div>
 
     <!-- STEP 1: Environment variables & DB -->
-    <div x-show="step === 1" class="card-ambient" x-transition.opacity>
-      <div class="mb-6 flex items-baseline justify-between">
-        <div>
-          <h2 class="text-xl font-semibold tracking-tight">Environment & Database</h2>
-          <p class="mt-1 text-sm text-ink-400">Env vars and optional database per service</p>
+    <div x-show="step === 1" class="card-ambient p-4 sm:p-6" x-transition.opacity>
+      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
+        <div class="min-w-0">
+          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Environment &amp; Database</h2>
+          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Env vars and optional database per service</p>
         </div>
-        <span class="font-mono text-xs text-ink-600">02</span>
+        <span class="shrink-0 font-mono text-xs text-ink-600">02</span>
       </div>
 
       <template x-for="(svc, i) in config.services" :key="i">
-        <div class="mb-8 border-t border-ink-800/60 pt-6 first:border-t-0 first:pt-0">
-          <h3 class="mb-4 text-sm font-semibold tracking-wide uppercase text-ink-300" x-text="svc.name"></h3>
+        <div class="mb-6 border-t border-ink-800/60 pt-5 first:border-t-0 first:pt-0 sm:mb-8 sm:pt-6">
+          <h3 class="mb-3 text-xs font-semibold tracking-wide uppercase text-ink-300 sm:mb-4 sm:text-sm" x-text="svc.name"></h3>
 
-          <div class="mb-5">
+          <div class="mb-4 sm:mb-5">
             <label class="label">Environment variables</label>
             <template x-for="(env, j) in svc.env" :key="j">
-              <div class="mb-2 flex gap-2">
-                <input type="text" class="input flex-1 font-mono text-xs" x-model="env.key" placeholder="API_KEY" />
-                <input type="text" class="input flex-1 font-mono text-xs" x-model="env.value" placeholder="value or ENV_VAR_NAME" />
-                <label class="flex items-center gap-1.5 text-xs text-ink-400 whitespace-nowrap px-2">
-                  <input type="checkbox" x-model="env.secret" class="rounded border-ink-700 bg-ink-950" />
-                  Secret
-                </label>
-                <button @click="svc.env.splice(j, 1)" class="px-2 text-ink-500 hover:text-red-400 transition">×</button>
+              <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div class="grid flex-1 grid-cols-2 gap-2 sm:flex sm:gap-2">
+                  <input type="text" class="input font-mono text-xs" x-model="env.key" placeholder="API_KEY" />
+                  <input type="text" class="input font-mono text-xs" x-model="env.value" placeholder="value or ENV_VAR_NAME" />
+                </div>
+                <div class="flex items-center justify-between gap-2 sm:justify-start">
+                  <label class="flex items-center gap-1.5 whitespace-nowrap text-xs text-ink-400">
+                    <input type="checkbox" x-model="env.secret" class="rounded border-ink-700 bg-ink-950" />
+                    Secret
+                  </label>
+                  <button @click="svc.env.splice(j, 1)" class="shrink-0 px-2 text-ink-500 hover:text-red-400 transition">×</button>
+                </div>
               </div>
             </template>
             <button @click="svc.env.push({key: '', value: '', secret: false})" class="btn btn-ghost text-xs">
@@ -164,18 +168,18 @@ const databases = JSON.stringify(DATABASES);
     </div>
 
     <!-- STEP 2: Registry & CI/CD -->
-    <div x-show="step === 2" class="card-ambient" x-transition.opacity>
-      <div class="mb-6 flex items-baseline justify-between">
-        <div>
-          <h2 class="text-xl font-semibold tracking-tight">Registry & CI/CD</h2>
-          <p class="mt-1 text-sm text-ink-400">Push images & automate deploys</p>
+    <div x-show="step === 2" class="card-ambient p-4 sm:p-6" x-transition.opacity>
+      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
+        <div class="min-w-0">
+          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Registry &amp; CI/CD</h2>
+          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Push images &amp; automate deploys</p>
         </div>
-        <span class="font-mono text-xs text-ink-600">03</span>
+        <span class="shrink-0 font-mono text-xs text-ink-600">03</span>
       </div>
 
-      <div class="grid gap-6 md:grid-cols-2">
-        <div class="rounded-lg border border-ink-800 bg-ink-950/40 p-4">
-          <h3 class="mb-3 text-sm font-semibold tracking-wide uppercase text-ink-300">Container Registry</h3>
+      <div class="grid gap-4 sm:gap-6 md:grid-cols-2">
+        <div class="rounded-lg border border-ink-800 bg-ink-950/40 p-3 sm:p-4">
+          <h3 class="mb-3 text-xs font-semibold tracking-wide uppercase text-ink-300 sm:text-sm">Container Registry</h3>
           <div class="space-y-2">
             <label class="flex cursor-pointer items-center gap-2.5 rounded-md p-2 hover:bg-ink-900/60 transition">
               <input type="radio" name="registry" value="ghcr" x-model="config.registry.type" class="border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500" />
@@ -198,8 +202,8 @@ const databases = JSON.stringify(DATABASES);
           </div>
         </div>
 
-        <div class="rounded-lg border border-ink-800 bg-ink-950/40 p-4">
-          <h3 class="mb-3 text-sm font-semibold tracking-wide uppercase text-ink-300">CI/CD</h3>
+        <div class="rounded-lg border border-ink-800 bg-ink-950/40 p-3 sm:p-4">
+          <h3 class="mb-3 text-xs font-semibold tracking-wide uppercase text-ink-300 sm:text-sm">CI/CD</h3>
           <label class="flex cursor-pointer items-center gap-2.5 rounded-md p-2 hover:bg-ink-900/60 transition">
             <input type="checkbox" x-model="config.ci" class="rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500" />
             <span class="text-sm">Generate GitHub Actions workflow</span>
@@ -212,21 +216,21 @@ const databases = JSON.stringify(DATABASES);
     </div>
 
     <!-- STEP 3: Preview & Download -->
-    <div x-show="step === 3" class="card-ambient" x-transition.opacity>
-      <div class="mb-6 flex items-baseline justify-between">
-        <div>
-          <h2 class="text-xl font-semibold tracking-tight">Preview & Download</h2>
-          <p class="mt-1 text-sm text-ink-400">Live preview of generated files</p>
+    <div x-show="step === 3" class="card-ambient p-4 sm:p-6" x-transition.opacity>
+      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
+        <div class="min-w-0">
+          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Preview &amp; Download</h2>
+          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Live preview of generated files</p>
         </div>
-        <span class="font-mono text-xs text-ink-600">04</span>
+        <span class="shrink-0 font-mono text-xs text-ink-600">04</span>
       </div>
 
-      <div class="grid gap-5 lg:grid-cols-[260px_1fr]">
+      <div class="grid gap-4 lg:grid-cols-[260px_1fr] lg:gap-5">
         <div>
           <h3 class="label">Files</h3>
-          <div class="space-y-1 max-h-[500px] overflow-y-auto pr-2">
+          <div class="space-y-1 max-h-[300px] overflow-y-auto pr-2 sm:max-h-[500px]">
             <template x-for="(f, i) in files" :key="i">
-              <button @click="active = i" :class="active === i ? 'bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/30' : 'text-ink-400 hover:bg-ink-900/60 hover:text-ink-200'" class="w-full rounded-md px-3 py-2 text-left font-mono text-xs transition">
+              <button @click="active = i" :class="active === i ? 'bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/30' : 'text-ink-400 hover:bg-ink-900/60 hover:text-ink-200'" class="w-full truncate rounded-md px-3 py-2 text-left font-mono text-xs transition">
                 <span x-text="f.path"></span>
               </button>
             </template>
@@ -235,26 +239,26 @@ const databases = JSON.stringify(DATABASES);
         </div>
 
         <div>
-          <div class="mb-2 flex items-center justify-between">
-            <h3 class="font-mono text-xs text-ink-300" x-text="files[active]?.path || ''"></h3>
-            <button @click="downloadZip()" class="btn btn-primary text-xs" :disabled="loading">
+          <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 class="truncate font-mono text-xs text-ink-300" x-text="files[active]?.path || ''"></h3>
+            <button @click="downloadZip()" class="btn btn-primary w-full text-xs sm:w-auto" :disabled="loading">
               <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
               <span x-show="!loading">Download ZIP</span>
               <span x-show="loading">Generating…</span>
             </button>
           </div>
-          <pre class="rounded-lg border border-ink-800 bg-ink-950/80 p-4 text-xs leading-relaxed overflow-auto max-h-[500px]"><code x-text="files[active]?.content || ''"></code></pre>
+          <pre class="overflow-auto rounded-lg border border-ink-800 bg-ink-950/80 p-3 text-xs leading-relaxed max-h-[400px] sm:max-h-[500px] sm:p-4"><code x-text="files[active]?.content || ''"></code></pre>
         </div>
       </div>
     </div>
 
     <!-- Navigation -->
-    <div class="mt-6 flex items-center justify-between">
-      <button @click="prev()" :disabled="step === 0" class="btn btn-ghost">
+    <div class="mt-5 flex flex-col-reverse gap-2 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <button @click="prev()" :disabled="step === 0" class="btn btn-ghost w-full sm:w-auto">
         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         Previous
       </button>
-      <button @click="next()" :disabled="loading" class="btn btn-primary">
+      <button @click="next()" :disabled="loading" class="btn btn-primary w-full sm:w-auto">
         <span x-show="step < steps.length - 1">Next step</span>
         <span x-show="step === steps.length - 1">Generate</span>
         <svg x-show="step < steps.length - 1" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
@@ -265,7 +269,6 @@ const databases = JSON.stringify(DATABASES);
     <div x-show="error" x-text="error" class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"></div>
   </div>
 
-  <!-- Inline data (not bundled, runs synchronously) -->
   <script is:inline define:vars={{ frameworks, databases }}>
     window.dockerWizardData = {
       frameworks: JSON.parse(frameworks),
@@ -273,7 +276,6 @@ const databases = JSON.stringify(DATABASES);
     };
   </script>
 
-  <!-- Alpine + wizard registration (bundled, tree-shake safe) -->
   <script>
     import { startAlpine } from '../lib/alpine';
     import { dockerWizardFactory } from '../lib/wizards/docker';

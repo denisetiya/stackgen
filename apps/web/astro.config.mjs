@@ -9,6 +9,11 @@ export default defineConfig({
     tailwind({ applyBaseStyles: true }),
   ],
   server: { host: '0.0.0.0', port: 4321 },
+  redirects: {
+    '/docker': '/',
+    '/gateway': '/',
+    '/cicd': '/',
+  },
   vite: {
     ssr: {
       noExternal: ['@stackgen/core'],

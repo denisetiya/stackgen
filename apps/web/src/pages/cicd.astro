@@ -3,22 +3,22 @@ import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="CI/CD Generator — Stackgen">
   <div x-data="cicdWizard" x-cloak>
-    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-6 flex flex-col gap-4 sm:mb-8 md:flex-row md:items-center md:justify-between">
       <div>
         <a href="/" class="inline-flex items-center gap-1.5 text-xs text-ink-400 hover:text-ink-200 transition">
           <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
           Back
         </a>
-        <h1 class="mt-2 text-2xl font-semibold tracking-tight">CI/CD Generator</h1>
+        <h1 class="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">CI/CD Generator</h1>
       </div>
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1.5">
           <template x-for="(s, i) in steps" :key="i">
             <div :class="{
               'bg-violet-500 shadow-[0_0_16px_rgba(167,139,250,0.7)]': step > i,
-              'bg-violet-400 w-14 shadow-[0_0_20px_rgba(167,139,250,0.9)]': step === i,
+              'bg-violet-400 w-12 sm:w-14 shadow-[0_0_20px_rgba(167,139,250,0.9)]': step === i,
               'bg-ink-800': step < i
-            }" class="h-1.5 w-10 rounded-full transition-all duration-300"></div>
+            }" class="h-1.5 w-8 rounded-full transition-all duration-300 sm:w-10"></div>
           </template>
         </div>
         <div class="font-mono text-xs text-ink-500 tabular-nums">
@@ -30,27 +30,27 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- STEP 0: Provider -->
-    <div x-show="step === 0" class="card-ambient" x-transition.opacity>
-      <div class="mb-6 flex items-baseline justify-between">
-        <div>
-          <h2 class="text-xl font-semibold tracking-tight">Pipeline provider</h2>
-          <p class="mt-1 text-sm text-ink-400">Where will your CI/CD run?</p>
+    <div x-show="step === 0" class="card-ambient p-4 sm:p-6" x-transition.opacity>
+      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
+        <div class="min-w-0">
+          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Pipeline provider</h2>
+          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Where will your CI/CD run?</p>
         </div>
-        <span class="font-mono text-xs text-ink-600">01</span>
+        <span class="shrink-0 font-mono text-xs text-ink-600">01</span>
       </div>
 
-      <div class="grid gap-3 md:grid-cols-2">
-        <button @click="config.provider = 'github'" :class="config.provider === 'github' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-4 text-left transition">
-          <div class="text-base font-semibold">GitHub Actions</div>
+      <div class="grid gap-2 sm:gap-3 md:grid-cols-2">
+        <button @click="config.provider = 'github'" :class="config.provider === 'github' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-3 text-left transition sm:p-4">
+          <div class="text-sm font-semibold sm:text-base">GitHub Actions</div>
           <div class="mt-1 text-xs text-ink-400">Most popular, free for public repos</div>
         </button>
-        <button @click="config.provider = 'gitlab'" :class="config.provider === 'gitlab' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-4 text-left transition">
-          <div class="text-base font-semibold">GitLab CI</div>
+        <button @click="config.provider = 'gitlab'" :class="config.provider === 'gitlab' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-3 text-left transition sm:p-4">
+          <div class="text-sm font-semibold sm:text-base">GitLab CI</div>
           <div class="mt-1 text-xs text-ink-400">Self-hosted runners supported</div>
         </button>
       </div>
 
-      <div class="mt-6">
+      <div class="mt-5 sm:mt-6">
         <label class="label">Trigger</label>
         <select class="input" x-model="config.trigger">
           <option value="push-main">Push to main</option>
@@ -62,53 +62,53 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- STEP 1: Steps -->
-    <div x-show="step === 1" class="card-ambient" x-transition.opacity>
-      <div class="mb-6 flex items-baseline justify-between">
-        <div>
-          <h2 class="text-xl font-semibold tracking-tight">Pipeline steps</h2>
-          <p class="mt-1 text-sm text-ink-400">What should the pipeline do?</p>
+    <div x-show="step === 1" class="card-ambient p-4 sm:p-6" x-transition.opacity>
+      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
+        <div class="min-w-0">
+          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Pipeline steps</h2>
+          <p class="mt-1 text-xs text-ink-400 sm:text-sm">What should the pipeline do?</p>
         </div>
-        <span class="font-mono text-xs text-ink-600">02</span>
+        <span class="shrink-0 font-mono text-xs text-ink-600">02</span>
       </div>
 
       <div class="space-y-2">
-        <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition">
-          <input type="checkbox" x-model="config.test" class="rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500" />
+        <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition sm:items-center">
+          <input type="checkbox" x-model="config.test" class="mt-0.5 rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500 sm:mt-0" />
           <div class="flex-1">
             <div class="text-sm font-medium">Run tests</div>
             <div class="text-xs text-ink-500">Unit + integration tests before deploy</div>
           </div>
-          <span class="font-mono text-[10px] text-ink-600">STEP 1</span>
+          <span class="shrink-0 font-mono text-[10px] text-ink-600">STEP 1</span>
         </label>
-        <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition">
-          <input type="checkbox" x-model="config.build" class="rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500" />
+        <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition sm:items-center">
+          <input type="checkbox" x-model="config.build" class="mt-0.5 rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500 sm:mt-0" />
           <div class="flex-1">
             <div class="text-sm font-medium">Build images</div>
             <div class="text-xs text-ink-500">Multi-stage Docker build</div>
           </div>
-          <span class="font-mono text-[10px] text-ink-600">STEP 2</span>
+          <span class="shrink-0 font-mono text-[10px] text-ink-600">STEP 2</span>
         </label>
-        <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition">
-          <input type="checkbox" x-model="config.push" class="rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500" />
+        <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition sm:items-center">
+          <input type="checkbox" x-model="config.push" class="mt-0.5 rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500 sm:mt-0" />
           <div class="flex-1">
             <div class="text-sm font-medium">Push to registry</div>
             <div class="text-xs text-ink-500">Tagged with SHA + branch</div>
           </div>
-          <span class="font-mono text-[10px] text-ink-600">STEP 3</span>
+          <span class="shrink-0 font-mono text-[10px] text-ink-600">STEP 3</span>
         </label>
-        <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition">
-          <input type="checkbox" x-model="config.deploy" class="rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500" />
+        <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition sm:items-center">
+          <input type="checkbox" x-model="config.deploy" class="mt-0.5 rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500 sm:mt-0" />
           <div class="flex-1">
             <div class="text-sm font-medium">Deploy (SSH)</div>
             <div class="text-xs text-ink-500">docker compose pull + up on remote</div>
           </div>
-          <span class="font-mono text-[10px] text-ink-600">STEP 4</span>
+          <span class="shrink-0 font-mono text-[10px] text-ink-600">STEP 4</span>
         </label>
       </div>
 
-      <div x-show="config.deploy" class="mt-6 border-t border-ink-800/60 pt-6">
-        <h3 class="mb-4 text-sm font-semibold tracking-wide uppercase text-ink-300">Deploy target</h3>
-        <div class="grid gap-3 md:grid-cols-3">
+      <div x-show="config.deploy" class="mt-5 border-t border-ink-800/60 pt-5 sm:mt-6 sm:pt-6">
+        <h3 class="mb-3 text-xs font-semibold tracking-wide uppercase text-ink-300 sm:mb-4 sm:text-sm">Deploy target</h3>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
           <div>
             <label class="label">Type</label>
             <select class="input" x-model="config.deployTarget.type">
@@ -130,17 +130,17 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- STEP 2: Registry + Notification -->
-    <div x-show="step === 2" class="card-ambient" x-transition.opacity>
-      <div class="mb-6 flex items-baseline justify-between">
-        <div>
-          <h2 class="text-xl font-semibold tracking-tight">Registry & Notification</h2>
-          <p class="mt-1 text-sm text-ink-400">Where images land &amp; how you get notified</p>
+    <div x-show="step === 2" class="card-ambient p-4 sm:p-6" x-transition.opacity>
+      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
+        <div class="min-w-0">
+          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Registry &amp; Notification</h2>
+          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Where images land &amp; how you get notified</p>
         </div>
-        <span class="font-mono text-xs text-ink-600">03</span>
+        <span class="shrink-0 font-mono text-xs text-ink-600">03</span>
       </div>
-      <div class="grid gap-5 md:grid-cols-2">
-        <div class="rounded-lg border border-ink-800 bg-ink-950/40 p-4">
-          <h3 class="mb-3 text-sm font-semibold tracking-wide uppercase text-ink-300">Registry</h3>
+      <div class="grid gap-4 sm:gap-5 md:grid-cols-2">
+        <div class="rounded-lg border border-ink-800 bg-ink-950/40 p-3 sm:p-4">
+          <h3 class="mb-3 text-xs font-semibold tracking-wide uppercase text-ink-300 sm:text-sm">Registry</h3>
           <label class="label">Type</label>
           <select class="input" x-model="config.registry.type">
             <option value="ghcr">GHCR · ghcr.io</option>
@@ -152,8 +152,8 @@ import Layout from '../layouts/Layout.astro';
             <input type="text" class="input" x-model="config.registry.namespace" placeholder="your-username" />
           </div>
         </div>
-        <div class="rounded-lg border border-ink-800 bg-ink-950/40 p-4">
-          <h3 class="mb-3 text-sm font-semibold tracking-wide uppercase text-ink-300">Notification</h3>
+        <div class="rounded-lg border border-ink-800 bg-ink-950/40 p-3 sm:p-4">
+          <h3 class="mb-3 text-xs font-semibold tracking-wide uppercase text-ink-300 sm:text-sm">Notification</h3>
           <select class="input" x-model="config.notification">
             <option value="none">None</option>
             <option value="telegram">Telegram</option>
@@ -166,44 +166,44 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- STEP 3: Preview -->
-    <div x-show="step === 3" class="card-ambient" x-transition.opacity>
-      <div class="mb-6 flex items-baseline justify-between">
-        <div>
-          <h2 class="text-xl font-semibold tracking-tight">Preview & Download</h2>
-          <p class="mt-1 text-sm text-ink-400">Live preview of generated files</p>
+    <div x-show="step === 3" class="card-ambient p-4 sm:p-6" x-transition.opacity>
+      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
+        <div class="min-w-0">
+          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Preview &amp; Download</h2>
+          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Live preview of generated files</p>
         </div>
-        <span class="font-mono text-xs text-ink-600">04</span>
+        <span class="shrink-0 font-mono text-xs text-ink-600">04</span>
       </div>
-      <div class="grid gap-5 lg:grid-cols-[260px_1fr]">
+      <div class="grid gap-4 lg:grid-cols-[260px_1fr] lg:gap-5">
         <div>
           <h3 class="label">Files</h3>
-          <div class="space-y-1 max-h-[500px] overflow-y-auto pr-2">
+          <div class="max-h-[300px] space-y-1 overflow-y-auto pr-2 sm:max-h-[500px]">
             <template x-for="(f, i) in files" :key="i">
-              <button @click="active = i" :class="active === i ? 'bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/30' : 'text-ink-400 hover:bg-ink-900/60 hover:text-ink-200'" class="w-full rounded-md px-3 py-2 text-left font-mono text-xs transition" x-text="f.path"></button>
+              <button @click="active = i" :class="active === i ? 'bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/30' : 'text-ink-400 hover:bg-ink-900/60 hover:text-ink-200'" class="w-full truncate rounded-md px-3 py-2 text-left font-mono text-xs transition" x-text="f.path"></button>
             </template>
           </div>
         </div>
         <div>
-          <div class="mb-2 flex items-center justify-between">
-            <h3 class="font-mono text-xs text-ink-300" x-text="files[active]?.path"></h3>
-            <button @click="downloadZip()" class="btn btn-primary text-xs" :disabled="loading">
+          <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 class="truncate font-mono text-xs text-ink-300" x-text="files[active]?.path"></h3>
+            <button @click="downloadZip()" class="btn btn-primary w-full text-xs sm:w-auto" :disabled="loading">
               <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
               <span x-show="!loading">Download ZIP</span>
               <span x-show="loading">Generating…</span>
             </button>
           </div>
-          <pre class="rounded-lg border border-ink-800 bg-ink-950/80 p-4 text-xs leading-relaxed overflow-auto max-h-[500px]"><code x-text="files[active]?.content"></code></pre>
+          <pre class="overflow-auto rounded-lg border border-ink-800 bg-ink-950/80 p-3 text-xs leading-relaxed max-h-[400px] sm:max-h-[500px] sm:p-4"><code x-text="files[active]?.content"></code></pre>
         </div>
       </div>
     </div>
 
     <!-- Navigation -->
-    <div class="mt-6 flex items-center justify-between">
-      <button @click="prev()" :disabled="step === 0" class="btn btn-ghost">
+    <div class="mt-5 flex flex-col-reverse gap-2 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <button @click="prev()" :disabled="step === 0" class="btn btn-ghost w-full sm:w-auto">
         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         Previous
       </button>
-      <button @click="next()" :disabled="loading" class="btn btn-primary">
+      <button @click="next()" :disabled="loading" class="btn btn-primary w-full sm:w-auto">
         <span x-show="step < steps.length - 1">Next step</span>
         <span x-show="step === steps.length - 1">Generate</span>
         <svg x-show="step < steps.length - 1" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
