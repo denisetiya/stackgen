@@ -1,0 +1,12 @@
+{
+  "name": "stackgen",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web-based generator for Docker, API Gateway, and CI/CD configs",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter core build && pnpm --filter web build",
+    "start": "pnpm --filter web preview"
+  },
+  "packageManager": "pnpm@11.8.0"
+}
