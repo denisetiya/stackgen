@@ -160,6 +160,13 @@ export function stackWizardFactory(): StackWizard {
       }
       this.config.cicd.enabled = this.config.docker.registry.type !== 'none';
 
+      // Honor ?step=N query param
+      const params = new URLSearchParams(window.location.search);
+      const stepParam = parseInt(params.get('step') ?? '', 10);
+      if (!isNaN(stepParam) && stepParam >= 0 && stepParam < this.totalSteps()) {
+        this.step = stepParam;
+      }
+
       this.$watch('config', () => {
         // Auto-toggle gateway based on mode
         if (this.config.docker.mode === 'microservice' && !this.config.gateway.enabled) {

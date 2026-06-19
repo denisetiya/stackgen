@@ -1,503 +1,142 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { FRAMEWORKS, DATABASES, GATEWAY_TYPES } from '@stackgen/core/schemas';
 
-const frameworks = JSON.stringify(FRAMEWORKS);
-const databases = JSON.stringify(DATABASES);
-const gateways = JSON.stringify(GATEWAY_TYPES);
+const generators = [
+  {
+    href: '/stack',
+    title: 'Docker',
+    desc: 'Multi-service compose, build contexts, healthchecks, registries.',
+    icon: 'docker',
+  },
+  {
+    href: '/stack?step=3',
+    title: 'Gateway',
+    desc: 'Kong, Envoy, Traefik, NGINX — auth, rate limits, routing.',
+    icon: 'gateway',
+  },
+  {
+    href: '/stack?step=4',
+    title: 'CI/CD',
+    desc: 'GitHub Actions, GitLab CI, build · push · deploy pipelines.',
+    icon: 'cicd',
+  },
+];
+
+const features = [
+  { k: '11', l: 'frameworks' },
+  { k: '4',  l: 'gateway types' },
+  { k: '3',  l: 'CI providers' },
+];
 ---
+
 <Layout title="Stackgen — Production stack generator">
-  <div x-data="stackWizard" x-cloak>
-    <!-- Header + step indicator -->
-    <div class="mb-6 flex flex-col gap-4 sm:mb-8 md:flex-row md:items-center md:justify-between">
-      <div>
-        <h1 class="text-xl font-semibold tracking-tight sm:text-2xl">Stack Generator</h1>
-        <p class="mt-1 text-xs text-ink-400 sm:text-sm">Docker + optional gateway + optional CI/CD, exported as a single ZIP</p>
+  <!-- Hero -->
+  <section class="section-ambient relative pt-10 pb-14 sm:pt-16 md:pt-24 md:pb-32">
+    <div class="mx-auto max-w-3xl text-center">
+      <div class="mb-4 inline-flex items-center gap-1.5 chip">
+        <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+        self-hosted · open source
       </div>
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1.5">
-          <template x-for="(s, i) in steps" :key="i">
-            <button @click="goto(i)" :class="{
-              'bg-violet-500 shadow-[0_0_12px_rgba(167,139,250,0.6)]': step > i,
-              'bg-violet-400 w-12 sm:w-14 shadow-[0_0_20px_rgba(167,139,250,0.9)]': step === i,
-              'bg-ink-800 hover:bg-ink-700': step < i
-            }" class="h-1.5 w-8 rounded-full transition-all duration-300 sm:w-10"></button>
-          </template>
-        </div>
-        <div class="font-mono text-xs text-ink-500 tabular-nums">
-          <span x-text="String(step + 1).padStart(2,'0')"></span>
-          <span class="text-ink-700">/</span>
-          <span x-text="String(totalSteps()).padStart(2,'0')"></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 0: Stack — mode + services -->
-    <div x-show="step === 0" class="card-ambient p-4 sm:p-6" x-transition.opacity>
-      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
-        <div class="min-w-0">
-          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Your stack</h2>
-          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Pick a mode and define the services that make it up</p>
-        </div>
-        <span class="shrink-0 font-mono text-xs text-ink-600">01</span>
-      </div>
-
-      <div class="mb-5 sm:mb-6">
-        <label class="label">Mode</label>
-        <div class="grid grid-cols-2 gap-2 sm:gap-3">
-          <button @click="config.docker.mode = 'single'" :class="config.docker.mode === 'single' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-3 text-left transition sm:p-4">
-            <div class="text-sm font-semibold sm:text-base">Single</div>
-            <div class="mt-1 text-xs text-ink-400">One service · simpler compose</div>
-          </button>
-          <button @click="config.docker.mode = 'microservice'" :class="config.docker.mode === 'microservice' ? 'border-violet-500/70 bg-violet-500/10 ring-1 ring-violet-500/30' : 'border-ink-800 hover:border-ink-700'" class="rounded-lg border bg-ink-900/40 p-3 text-left transition sm:p-4">
-            <div class="text-sm font-semibold sm:text-base">Microservice</div>
-            <div class="mt-1 text-xs text-ink-400">Multiple services · gateway suggested</div>
-          </button>
-        </div>
-      </div>
-
-      <div class="mb-3 flex items-center justify-between">
-        <h3 class="text-sm font-semibold tracking-wide uppercase text-ink-300">Services</h3>
-        <span class="font-mono text-[10px] text-ink-600" x-text="config.docker.services.length + ' service' + (config.docker.services.length === 1 ? '' : 's')"></span>
-      </div>
-
-      <template x-for="(svc, i) in config.docker.services" :key="i">
-        <div class="mb-4 rounded-lg border border-ink-800 bg-ink-950/40 p-3 sm:mb-5 sm:p-4">
-          <div class="mb-3 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="font-mono text-xs text-ink-500">svc-<span x-text="i + 1"></span></span>
-              <input type="text" class="input w-40 sm:w-48" x-model="svc.name" placeholder="api" />
-            </div>
-            <button @click="removeService(i)" x-show="config.docker.services.length > 1" class="text-xs text-ink-500 hover:text-red-400 transition">Remove</button>
-          </div>
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <div>
-              <label class="label">Framework</label>
-              <select class="input" x-model="svc.framework" @change="
-                const fw = frameworks.find(f => f.id === svc.framework);
-                if (fw) { svc.port = fw.defaultPort; svc.baseImage = fw.defaultBase.includes('alpine') ? 'alpine' : (fw.defaultBase.includes('slim') ? 'slim' : 'alpine'); }
-              ">
-                <template x-for="fw in frameworks" :key="fw.id">
-                  <option :value="fw.id" x-text="fw.name + ' · ' + fw.lang"></option>
-                </template>
-              </select>
-            </div>
-            <div>
-              <label class="label">Port</label>
-              <input type="number" class="input font-mono" x-model.number="svc.port" min="1" max="65535" />
-            </div>
-            <div>
-              <label class="label">Base image</label>
-              <select class="input" x-model="svc.baseImage">
-                <option value="alpine">alpine · ~5MB</option>
-                <option value="slim">slim · ~80MB</option>
-                <option value="distroless">distroless · ~20MB</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </template>
-      <button @click="addService()" class="btn btn-ghost w-full">
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-        Add service
-      </button>
-    </div>
-
-    <!-- STEP 1: Environment -->
-    <div x-show="step === 1" class="card-ambient p-4 sm:p-6" x-transition.opacity>
-      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
-        <div class="min-w-0">
-          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Environment &amp; data</h2>
-          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Env vars and databases per service</p>
-        </div>
-        <span class="shrink-0 font-mono text-xs text-ink-600">02</span>
-      </div>
-
-      <template x-for="(svc, si) in config.docker.services" :key="si">
-        <div class="mb-6 last:mb-0">
-          <div class="mb-3 flex items-baseline gap-2">
-            <h3 class="text-sm font-semibold text-ink-200" x-text="svc.name"></h3>
-            <span class="font-mono text-[10px] text-ink-600" x-text="'· ' + svc.framework"></span>
-          </div>
-
-          <!-- Env vars -->
-          <div class="mb-4">
-            <div class="mb-2 flex items-center justify-between">
-              <label class="label !mb-0">Env vars</label>
-              <span class="font-mono text-[10px] text-ink-600" x-text="svc.env.length + ' var' + (svc.env.length === 1 ? '' : 's')"></span>
-            </div>
-            <template x-for="(env, ei) in svc.env" :key="ei">
-              <div class="mb-2 flex flex-col gap-2 rounded-md border border-ink-800/60 bg-ink-950/30 p-2 sm:flex-row sm:items-center">
-                <input type="text" class="input flex-1 font-mono text-xs" x-model="env.key" placeholder="KEY" />
-                <input :type="env.secret ? 'password' : 'text'" class="input flex-1 font-mono text-xs" x-model="env.value" :placeholder="env.secret ? '••••••' : 'value'" />
-                <label class="flex shrink-0 cursor-pointer items-center gap-1.5 px-2 text-xs text-ink-400">
-                  <input type="checkbox" x-model="env.secret" class="rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500" />
-                  <span>secret</span>
-                </label>
-                <button @click="svc.env.splice(ei, 1)" class="shrink-0 px-2 text-xs text-ink-500 hover:text-red-400">×</button>
-              </div>
-            </template>
-            <button @click="svc.env.push({ key: 'NEW_VAR', value: '', secret: false })" class="btn btn-ghost w-full text-xs">
-              <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-              Add env var
-            </button>
-          </div>
-
-          <!-- Database -->
-          <div class="rounded-lg border border-ink-800/60 bg-ink-950/30 p-3">
-            <div class="mb-3 flex items-start justify-between gap-2">
-              <div>
-                <div class="text-xs font-semibold tracking-wide uppercase text-ink-400">Database</div>
-                <div class="mt-0.5 text-[10px] text-ink-600">Optional — adds db service + connection env vars</div>
-              </div>
-              <label class="flex shrink-0 cursor-pointer items-center gap-2">
-                <input type="checkbox" x-model="svc.database.enabled" @change="if (svc.database.enabled && !svc.database.type) svc.database = { type: 'postgres', version: '16', name: svc.name.replace(/-/g, '_'), user: 'app', password: 'changeme', port: 5432 }" class="rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500" />
-                <span class="text-xs text-ink-300">enable</span>
-              </label>
-            </div>
-            <div x-show="svc.database" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div>
-                <label class="label">Type</label>
-                <select class="input" x-model="svc.database.type">
-                  <template x-for="db in databases" :key="db.id">
-                    <option :value="db.id" x-text="db.name"></option>
-                  </template>
-                </select>
-              </div>
-              <div>
-                <label class="label">Version</label>
-                <input type="text" class="input font-mono" x-model="svc.database.version" />
-              </div>
-              <div>
-                <label class="label">User</label>
-                <input type="text" class="input font-mono" x-model="svc.database.user" />
-              </div>
-              <div>
-                <label class="label">Password</label>
-                <input type="text" class="input font-mono" x-model="svc.database.password" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-    </div>
-
-    <!-- STEP 2: Registry -->
-    <div x-show="step === 2" class="card-ambient p-4 sm:p-6" x-transition.opacity>
-      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
-        <div class="min-w-0">
-          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Registry &amp; network</h2>
-          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Where images will be pushed (drives CI/CD availability)</p>
-        </div>
-        <span class="shrink-0 font-mono text-xs text-ink-600">03</span>
-      </div>
-
-      <div class="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
-        <div>
-          <label class="label">Registry</label>
-          <select class="input" x-model="config.docker.registry.type">
-            <option value="ghcr">GHCR · ghcr.io</option>
-            <option value="dockerhub">Docker Hub · docker.io</option>
-            <option value="none">None · build only</option>
-          </select>
-          <p class="mt-2 text-[11px] text-ink-600">If "none" is selected, CI/CD auto-disables.</p>
-        </div>
-        <div x-show="config.docker.registry.type !== 'none'">
-          <label class="label">Namespace</label>
-          <input type="text" class="input font-mono" x-model="config.docker.registry.namespace" placeholder="your-username" />
-        </div>
-        <div x-show="config.docker.registry.type !== 'none'">
-          <label class="label">Image name</label>
-          <input type="text" class="input font-mono" x-model="config.docker.registry.imageName" placeholder="app" />
-        </div>
-        <div>
-          <label class="label">Compose network</label>
-          <input type="text" class="input font-mono" x-model="config.docker.network" placeholder="app-net" />
-        </div>
+      <h1 class="text-balance text-4xl font-semibold tracking-tight text-ink-50 sm:text-5xl md:text-6xl">
+        Production scaffolding,
+        <span class="bg-gradient-to-r from-violet-300 to-violet-500 bg-clip-text text-transparent">not starter templates</span>
+      </h1>
+      <p class="mx-auto mt-5 max-w-xl text-balance text-base text-ink-400 md:text-lg">
+        Docker compose, API gateways, and CI/CD pipelines as a single ZIP — with the configuration you'd actually ship.
+      </p>
+      <div class="mt-7 flex flex-wrap items-center justify-center gap-2">
+        <a href="/stack" class="btn btn-primary">
+          Open Generator
+          <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3.5 8h9m0 0L8.5 4m4 4l-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a href="https://github.com/denisetiya/stackgen" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+          <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.34c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.16-.89-1.16-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.01.08-2.11 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.91.08 2.11.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.94.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          View source
+        </a>
       </div>
     </div>
+  </section>
 
-    <!-- STEP 3: Gateway (optional) -->
-    <div x-show="step === 3" x-transition.opacity>
-      <!-- Toggle card -->
-      <div class="card-ambient p-4 sm:p-6">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <h2 class="text-lg font-semibold tracking-tight sm:text-xl">API Gateway</h2>
-              <span class="rounded border border-ink-800 bg-ink-900/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-500">Optional</span>
-            </div>
-            <p class="mt-1 text-xs text-ink-400 sm:text-sm">Route, auth &amp; rate-limit all services through one entry point</p>
+  <!-- Generator cards -->
+  <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {generators.map((g) => (
+      <a href={g.href} class="card-hover group block">
+        <div class="flex items-start justify-between">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg border border-ink-800 bg-ink-950/60 text-violet-300 transition group-hover:border-violet-500/40 group-hover:text-violet-200">
+            {g.icon === 'docker' && (
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="11" width="3" height="2" rx="0.5"/>
+                <rect x="7" y="11" width="3" height="2" rx="0.5"/>
+                <rect x="11" y="11" width="3" height="2" rx="0.5"/>
+                <rect x="15" y="11" width="3" height="2" rx="0.5"/>
+                <rect x="5" y="7" width="3" height="2" rx="0.5"/>
+                <rect x="9" y="7" width="3" height="2" rx="0.5"/>
+                <rect x="13" y="7" width="3" height="2" rx="0.5"/>
+                <rect x="9" y="3" width="3" height="2" rx="0.5"/>
+                <path d="M2 14c1.5 1 3 1.5 5 1.5h10c2 0 3.5-.5 5-1.5" stroke-linecap="round"/>
+              </svg>
+            )}
+            {g.icon === 'gateway' && (
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 12h6m4 0h6M12 4v4m0 8v4" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="3"/>
+                <circle cx="4" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="20" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+            )}
+            {g.icon === 'cicd' && (
+              <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" stroke="currentColor" stroke-width="1.5">
+                <circle cx="6" cy="6" r="2.5"/>
+                <circle cx="6" cy="18" r="2.5"/>
+                <circle cx="18" cy="12" r="2.5"/>
+                <path d="M6 8.5v7M8 7l8 3.5M8 17l8-3.5" stroke-linecap="round"/>
+              </svg>
+            )}
           </div>
-          <div class="flex shrink-0 items-center gap-1 rounded-lg border border-ink-800 bg-ink-950/60 p-1">
-            <button @click="toggleGateway(true)" :class="config.gateway.enabled ? 'bg-violet-500/20 text-violet-200' : 'text-ink-400 hover:text-ink-200'" class="rounded-md px-3 py-1.5 text-xs font-medium transition">Yes · include</button>
-            <button @click="toggleGateway(false)" :class="!config.gateway.enabled ? 'bg-ink-800 text-ink-200' : 'text-ink-400 hover:text-ink-200'" class="rounded-md px-3 py-1.5 text-xs font-medium transition">No · skip</button>
-          </div>
+          <svg viewBox="0 0 16 16" class="h-3.5 w-3.5 -translate-x-1 text-ink-600 transition group-hover:translate-x-0 group-hover:text-violet-400" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3.5 8h9m0 0L8.5 4m4 4l-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
-        <div class="mt-3 font-mono text-[10px] text-ink-600">04</div>
+        <h3 class="mt-4 text-lg font-semibold text-ink-50">{g.title}</h3>
+        <p class="mt-1.5 text-sm leading-relaxed text-ink-400">{g.desc}</p>
+      </a>
+    ))}
+  </section>
+
+  <!-- Features strip -->
+  <section class="mt-12 grid gap-px overflow-hidden rounded-xl border border-ink-800/80 bg-ink-800/40 sm:mt-20 sm:grid-cols-3">
+    {features.map((s) => (
+      <div class="bg-ink-950/40 p-4 text-center backdrop-blur-sm">
+        <div class="text-2xl font-semibold tabular-nums text-ink-50">{s.k}</div>
+        <div class="mt-0.5 text-xs uppercase tracking-wider text-ink-500">{s.l}</div>
       </div>
+    ))}
+  </section>
 
-      <!-- Config when enabled -->
-      <div x-show="config.gateway.enabled" class="card-ambient mt-4 p-4 sm:p-6" x-transition.opacity>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <label class="label">Type</label>
-            <select class="input" x-model="config.gateway.type">
-              <template x-for="gw in gateways" :key="gw.id">
-                <option :value="gw.id" x-text="gw.name + ' · ' + gw.desc"></option>
-              </template>
-            </select>
-          </div>
-          <div>
-            <label class="label">TLS</label>
-            <select class="input" x-model="config.gateway.tls">
-              <option value="none">None · HTTP only</option>
-              <option value="selfsigned">Self-signed · dev</option>
-              <option value="letsencrypt">Let's Encrypt · prod</option>
-            </select>
-          </div>
-          <div x-show="config.gateway.tls === 'letsencrypt'">
-            <label class="label">Email (LE)</label>
-            <input type="email" class="input" x-model="config.gateway.email" placeholder="you@example.com" />
-          </div>
-          <div class="flex items-end">
-            <label class="flex w-full cursor-pointer items-start gap-2.5 rounded-md border border-ink-800 bg-ink-950/40 p-2.5 hover:bg-ink-900/60 transition sm:items-center">
-              <input type="checkbox" x-model="config.gateway.dashboard" class="mt-0.5 rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500 sm:mt-0" />
-              <div>
-                <div class="text-sm font-medium">Admin dashboard</div>
-                <div class="text-[11px] text-ink-500">Kong Manager, Traefik dashboard</div>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        <div class="mt-5">
-          <div class="mb-3 flex items-center justify-between">
-            <h3 class="text-sm font-semibold tracking-wide uppercase text-ink-300">Routes</h3>
-            <span class="font-mono text-[10px] text-ink-600" x-text="config.gateway.services.length + ' route' + (config.gateway.services.length === 1 ? '' : 's')"></span>
-          </div>
-          <p class="mb-3 text-[11px] text-ink-500">Pre-populated from your Docker services. Edit upstream/path/auth as needed.</p>
-          <template x-for="(svc, i) in config.gateway.services" :key="i">
-            <div class="mb-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3">
-              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div>
-                  <label class="label">Name</label>
-                  <input type="text" class="input" x-model="svc.name" />
-                </div>
-                <div>
-                  <label class="label">Upstream</label>
-                  <input type="text" class="input font-mono text-xs" x-model="svc.upstream" />
-                </div>
-                <div>
-                  <label class="label">Path</label>
-                  <input type="text" class="input font-mono text-xs" x-model="svc.path" />
-                </div>
-                <div>
-                  <label class="label">Domain</label>
-                  <input type="text" class="input font-mono text-xs" x-model="svc.domain" placeholder="api.example.com" />
-                </div>
-              </div>
-              <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div>
-                  <label class="label">Auth</label>
-                  <select class="input" x-model="svc.auth">
-                    <option value="none">None</option>
-                    <option value="jwt">JWT</option>
-                    <option value="keycloak">Keycloak</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="label">Rate limit (rps)</label>
-                  <input type="number" class="input" x-model.number="svc.rateLimit" min="0" placeholder="0 = off" />
-                </div>
-                <div>
-                  <label class="label">CORS origins</label>
-                  <input type="text" class="input font-mono text-xs" :value="svc.corsOrigins.join(', ')" @input="svc.corsOrigins = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)" placeholder="https://app.com" />
-                </div>
-              </div>
-            </div>
-          </template>
-          <button @click="addGatewayService()" class="btn btn-ghost w-full text-xs">
-            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            Add route
-          </button>
-        </div>
+  <!-- How it works -->
+  <section class="mt-16 sm:mt-24">
+    <h2 class="text-center text-2xl font-semibold tracking-tight text-ink-50 sm:text-3xl">One flow, one ZIP</h2>
+    <p class="mx-auto mt-2 max-w-xl text-center text-sm text-ink-400 sm:text-base">
+      Configure everything once. Get a single, ready-to-run archive.
+    </p>
+    <div class="mt-10 grid gap-4 sm:grid-cols-3">
+      <div class="card-ambient p-5">
+        <div class="font-mono text-xs text-ink-600">01</div>
+        <h3 class="mt-2 text-base font-semibold text-ink-100">Define your stack</h3>
+        <p class="mt-1.5 text-sm leading-relaxed text-ink-400">Pick frameworks, ports, env vars, and databases per service.</p>
+      </div>
+      <div class="card-ambient p-5">
+        <div class="font-mono text-xs text-ink-600">02</div>
+        <h3 class="mt-2 text-base font-semibold text-ink-100">Opt into gateway &amp; CI/CD</h3>
+        <p class="mt-1.5 text-sm leading-relaxed text-ink-400">Each step has a toggle — include what you need, skip what you don't.</p>
+      </div>
+      <div class="card-ambient p-5">
+        <div class="font-mono text-xs text-ink-600">03</div>
+        <h3 class="mt-2 text-base font-semibold text-ink-100">Download &amp; ship</h3>
+        <p class="mt-1.5 text-sm leading-relaxed text-ink-400">Live preview, then download one ZIP with everything wired up.</p>
       </div>
     </div>
-
-    <!-- STEP 4: CI/CD (optional) -->
-    <div x-show="step === 4" x-transition.opacity>
-      <div class="card-ambient p-4 sm:p-6">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <h2 class="text-lg font-semibold tracking-tight sm:text-xl">CI/CD Pipeline</h2>
-              <span class="rounded border border-ink-800 bg-ink-900/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-500">Optional</span>
-            </div>
-            <p class="mt-1 text-xs text-ink-400 sm:text-sm">Auto build, push, and deploy on every commit</p>
-          </div>
-          <div class="flex shrink-0 items-center gap-1 rounded-lg border border-ink-800 bg-ink-950/60 p-1">
-            <button @click="toggleCicd(true)" :class="config.cicd.enabled ? 'bg-violet-500/20 text-violet-200' : 'text-ink-400 hover:text-ink-200'" class="rounded-md px-3 py-1.5 text-xs font-medium transition">Yes · include</button>
-            <button @click="toggleCicd(false)" :class="!config.cicd.enabled ? 'bg-ink-800 text-ink-200' : 'text-ink-400 hover:text-ink-200'" class="rounded-md px-3 py-1.5 text-xs font-medium transition">No · skip</button>
-          </div>
-        </div>
-        <div class="mt-3 font-mono text-[10px] text-ink-600">05</div>
-      </div>
-
-      <div x-show="config.cicd.enabled" class="card-ambient mt-4 p-4 sm:p-6" x-transition.opacity>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <label class="label">Provider</label>
-            <select class="input" x-model="config.cicd.provider">
-              <option value="github">GitHub Actions</option>
-              <option value="gitlab">GitLab CI</option>
-            </select>
-          </div>
-          <div>
-            <label class="label">Trigger</label>
-            <select class="input" x-model="config.cicd.trigger">
-              <option value="push-main">Push to main</option>
-              <option value="push-tags">Push tags (v*)</option>
-              <option value="pr">Pull requests</option>
-              <option value="manual">Manual</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="mt-5 space-y-2">
-          <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition sm:items-center">
-            <input type="checkbox" x-model="config.cicd.test" class="mt-0.5 rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500 sm:mt-0" />
-            <div class="flex-1">
-              <div class="text-sm font-medium">Run tests</div>
-              <div class="text-xs text-ink-500">Before build</div>
-            </div>
-          </label>
-          <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition sm:items-center">
-            <input type="checkbox" x-model="config.cicd.build" class="mt-0.5 rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500 sm:mt-0" />
-            <div class="flex-1">
-              <div class="text-sm font-medium">Build images</div>
-              <div class="text-xs text-ink-500">Multi-stage Docker build</div>
-            </div>
-          </label>
-          <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition sm:items-center">
-            <input type="checkbox" x-model="config.cicd.push" class="mt-0.5 rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500 sm:mt-0" />
-            <div class="flex-1">
-              <div class="text-sm font-medium">Push to registry</div>
-              <div class="text-xs text-ink-500">Tagged with SHA + branch</div>
-            </div>
-          </label>
-          <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-800 bg-ink-950/40 p-3 hover:bg-ink-900/60 transition sm:items-center">
-            <input type="checkbox" x-model="config.cicd.deploy" class="mt-0.5 rounded border-ink-700 bg-ink-950 text-violet-600 focus:ring-violet-500 sm:mt-0" />
-            <div class="flex-1">
-              <div class="text-sm font-medium">Deploy to remote</div>
-              <div class="text-xs text-ink-500">SSH / k8s / Fly</div>
-            </div>
-          </label>
-        </div>
-
-        <div x-show="config.cicd.deploy" class="mt-5 border-t border-ink-800/60 pt-5">
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div>
-              <label class="label">Target</label>
-              <select class="input" x-model="config.cicd.deployTarget.type">
-                <option value="ssh">SSH</option>
-                <option value="k8s">Kubernetes</option>
-                <option value="fly">Fly.io</option>
-              </select>
-            </div>
-            <div x-show="config.cicd.deployTarget.type === 'ssh'">
-              <label class="label">Host</label>
-              <input type="text" class="input font-mono text-xs" x-model="config.cicd.deployTarget.host" placeholder="app.example.com" />
-            </div>
-            <div x-show="config.cicd.deployTarget.type === 'ssh'">
-              <label class="label">User</label>
-              <input type="text" class="input font-mono text-xs" x-model="config.cicd.deployTarget.user" placeholder="deploy" />
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-5">
-          <label class="label">Notification</label>
-          <select class="input" x-model="config.cicd.notification">
-            <option value="none">None</option>
-            <option value="telegram">Telegram</option>
-            <option value="slack">Slack</option>
-            <option value="discord">Discord</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 5: Preview -->
-    <div x-show="step === 5" class="card-ambient p-4 sm:p-6" x-transition.opacity>
-      <div class="mb-5 flex items-baseline justify-between gap-3 sm:mb-6">
-        <div class="min-w-0">
-          <h2 class="text-lg font-semibold tracking-tight sm:text-xl">Preview &amp; download</h2>
-          <p class="mt-1 text-xs text-ink-400 sm:text-sm">Single ZIP · Docker + <span x-text="config.gateway.enabled ? 'gateway + ' : ''"></span><span x-text="config.cicd.enabled ? 'CI/CD' : ''"></span><span x-show="!config.gateway.enabled && !config.cicd.enabled">only</span></p>
-        </div>
-        <span class="shrink-0 font-mono text-xs text-ink-600">06</span>
-      </div>
-
-      <div x-show="loading" class="flex items-center justify-center py-12 text-sm text-ink-400">
-        <svg class="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>
-        Generating…
-      </div>
-
-      <div x-show="!loading && files.length > 0" class="grid gap-4 lg:grid-cols-[260px_1fr] lg:gap-5">
-        <div>
-          <h3 class="label">Files <span class="font-mono text-[10px] text-ink-600">(<span x-text="files.length"></span>)</span></h3>
-          <div class="max-h-[300px] space-y-1 overflow-y-auto pr-2 sm:max-h-[500px]">
-            <template x-for="(f, i) in files" :key="i">
-              <button @click="active = i" :class="active === i ? 'bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/30' : 'text-ink-400 hover:bg-ink-900/60 hover:text-ink-200'" class="w-full truncate rounded-md px-3 py-2 text-left font-mono text-xs transition" x-text="f.path"></button>
-            </template>
-          </div>
-        </div>
-        <div>
-          <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h3 class="truncate font-mono text-xs text-ink-300" x-text="files[active]?.path"></h3>
-            <button @click="downloadZip()" class="btn btn-primary w-full text-xs sm:w-auto" :disabled="loading">
-              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
-              <span x-show="!loading">Download ZIP</span>
-              <span x-show="loading">Generating…</span>
-            </button>
-          </div>
-          <pre class="overflow-auto rounded-lg border border-ink-800 bg-ink-950/80 p-3 text-xs leading-relaxed max-h-[400px] sm:max-h-[500px] sm:p-4"><code x-text="files[active]?.content"></code></pre>
-        </div>
-      </div>
-
-      <div x-show="!loading && files.length === 0" class="rounded-lg border border-dashed border-ink-800 p-8 text-center text-sm text-ink-500">
-        Configure the steps above then continue
-      </div>
-    </div>
-
-    <!-- Navigation -->
-    <div class="mt-5 flex flex-col-reverse gap-2 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-      <button @click="prev()" :disabled="step === 0" class="btn btn-ghost w-full sm:w-auto">
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        Previous
-      </button>
-      <button @click="next()" :disabled="loading || !canGoNext()" class="btn btn-primary w-full sm:w-auto">
-        <span x-show="step < totalSteps() - 1">Next step</span>
-        <span x-show="step === totalSteps() - 1">Generate</span>
-        <svg x-show="step < totalSteps() - 1" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-      </button>
-    </div>
-
-    <div x-show="error" x-text="error" class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"></div>
-  </div>
-
-  <script is:inline define:vars={{ frameworks, databases, gateways }}>
-    window.stackWizardData = {
-      frameworks: JSON.parse(frameworks),
-      databases: JSON.parse(databases),
-      gateways: JSON.parse(gateways),
-    };
-  </script>
-
-  <script>
-    import { startAlpine } from '../lib/alpine';
-    import { stackWizardFactory } from '../lib/wizards/stack';
-
-    startAlpine({ stackWizard: stackWizardFactory });
-  </script>
+  </section>
 </Layout>

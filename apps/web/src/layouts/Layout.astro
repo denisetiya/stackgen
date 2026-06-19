@@ -2,8 +2,10 @@
 import '../styles/global.css';
 const { title = 'Stackgen' } = Astro.props;
 const path = Astro.url.pathname;
-const isActive = (p: string) =>
-  path === p || path.startsWith(p + '/');
+const isActive = (p: string) => {
+  if (p === '/') return path === '/';
+  return path === p || path.startsWith(p + '/');
+};
 ---
 <!doctype html>
 <html lang="en">
@@ -35,7 +37,8 @@ const isActive = (p: string) =>
         </a>
         <nav class="flex items-center gap-1 text-sm">
           {[
-            { href: '/', label: 'Generator' },
+            { href: '/', label: 'Home' },
+            { href: '/stack', label: 'Generator' },
             { href: 'https://github.com/denisetiya/stackgen', label: 'GitHub', external: true },
           ].map((l) => (
             <a

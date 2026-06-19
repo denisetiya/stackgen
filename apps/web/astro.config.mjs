@@ -10,9 +10,9 @@ export default defineConfig({
   ],
   server: { host: '0.0.0.0', port: 4321 },
   redirects: {
-    '/docker': '/',
-    '/gateway': '/',
-    '/cicd': '/',
+    '/docker': '/stack',
+    '/gateway': '/stack?step=3',
+    '/cicd': '/stack?step=4',
   },
   vite: {
     ssr: {
